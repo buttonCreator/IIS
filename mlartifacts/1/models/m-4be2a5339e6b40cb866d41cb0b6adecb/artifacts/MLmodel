@@ -1,0 +1,36 @@
+artifact_path: /Users/alexandr/MPEI/IIS/mlartifacts/1/models/m-4be2a5339e6b40cb866d41cb0b6adecb/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+is_signature_from_type_hint: false
+mlflow_version: 3.1.4
+model_id: m-4be2a5339e6b40cb866d41cb0b6adecb
+model_size_bytes: 3240674
+model_uuid: m-4be2a5339e6b40cb866d41cb0b6adecb
+prompts: null
+run_id: c1da6f53a49143ad848b5c017bbb696b
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "battery_power", "required": true}, {"type":
+    "long", "name": "px_height", "required": true}, {"type": "long", "name": "px_width",
+    "required": true}, {"type": "long", "name": "ram", "required": true}, {"type":
+    "double", "name": "kbins_2", "required": true}]'
+  outputs: null
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-20 07:22:01.009185'

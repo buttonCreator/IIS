@@ -1,0 +1,47 @@
+artifact_path: /Users/alexandr/MPEI/IIS/mlartifacts/4/models/m-3b379d00a2ab47aaaf4fbd9ccff060f3/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+is_signature_from_type_hint: false
+mlflow_version: 3.1.4
+model_id: m-3b379d00a2ab47aaaf4fbd9ccff060f3
+model_size_bytes: 1430582
+model_uuid: m-3b379d00a2ab47aaaf4fbd9ccff060f3
+prompts: null
+run_id: e5ae5f34187747f49445d5bae5d1724e
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "battery_power", "required": true}, {"type":
+    "long", "name": "blue", "required": true}, {"type": "double", "name": "clock_speed",
+    "required": true}, {"type": "long", "name": "dual_sim", "required": true}, {"type":
+    "long", "name": "fc", "required": true}, {"type": "long", "name": "four_g", "required":
+    true}, {"type": "long", "name": "int_memory", "required": true}, {"type": "double",
+    "name": "m_dep", "required": true}, {"type": "long", "name": "mobile_wt", "required":
+    true}, {"type": "long", "name": "n_cores", "required": true}, {"type": "long",
+    "name": "pc", "required": true}, {"type": "long", "name": "px_height", "required":
+    true}, {"type": "long", "name": "px_width", "required": true}, {"type": "long",
+    "name": "ram", "required": true}, {"type": "long", "name": "sc_h", "required":
+    true}, {"type": "long", "name": "sc_w", "required": true}, {"type": "long", "name":
+    "talk_time", "required": true}, {"type": "long", "name": "three_g", "required":
+    true}, {"type": "long", "name": "touch_screen", "required": true}, {"type": "long",
+    "name": "wifi", "required": true}, {"type": "double", "name": "battery_efficiency",
+    "required": true}, {"type": "double", "name": "screen_size", "required": true}]'
+  outputs: null
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-26 07:11:40.257006'

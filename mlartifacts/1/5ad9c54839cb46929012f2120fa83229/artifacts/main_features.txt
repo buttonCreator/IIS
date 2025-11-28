@@ -1,0 +1,2 @@
+0,11,12,13,30
+battery_power,px_height,px_width,ram,kbins_2
