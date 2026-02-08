@@ -328,10 +328,10 @@ prometheus-client==0.19.0
 **Ключевые метрики:**
 
 **Гистограмма предсказаний модели**
-![alt text](<graphf/prediction histogram.jpg>)
+![alt text](<graphf/prediction histogram.png>)
 
 **Частота (rate) запросов к основному сервису в минуту**
-![alt text](<graphf/frequency of requests.jpg>)
+![alt text](<graphf/requency of requests.png>)
 
 ### 2. Grafana Dashboard
 
