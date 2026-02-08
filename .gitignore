@@ -2,3 +2,13 @@
 *.pkl
 .venv*/
 venv/
+__pycache__/
+
+# Docker volumes data
+services/prometheus/data/
+services/grafana/data/
+services/database/data/
+services/database/pgadmin/
+
+# Environment files
+.env

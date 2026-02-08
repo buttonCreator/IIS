@@ -1,43 +1,66 @@
-# Лабораторная работа №1. Настройка окружения и разведочный анализ данных
+# Проект классификации ценового диапазона мобильных телефонов
 
 ## Описание проекта
-Данный проект создан в рамках выполнения лабораторной работы №1.  
-Основная цель — подготовка структуры проекта, настройка рабочего окружения и проведение разведочного анализа данных (EDA).  
-В дальнейшем этот проект будет развиваться при выполнении следующих лабораторных работ.
+Полноценный ML-проект с микросервисной архитектурой для предсказания ценового диапазона мобильных телефонов на основе их характеристик.
+
+### Используемые технологии и библиотеки:
+- **Machine Learning**: scikit-learn, pandas, numpy
+- **Эксперименты и трекинг**: MLflow
+- **API**: FastAPI, Uvicorn
+- **Контейнеризация**: Docker, Docker Compose
+- **Мониторинг**: Prometheus, Grafana
+- **Визуализация**: matplotlib, seaborn, plotly
+- **Оптимизация**: Optuna (гиперпараметры)
+
+Проект включает в себя:
+- Разведочный анализ данных (EDA)
+- Обучение и оптимизацию моделей ML
+- Отслеживание экспериментов через MLflow
+- Развертывание модели в виде REST API
+- Мониторинг работы сервиса в реальном времени
+- Автоматическое тестирование через генерацию запросов
 
 ---
 
 ## Структура проекта
-На текущем этапе структура проекта имеет вид:
 ```
-├── data
+├── data/                      # Датасеты
 │   ├── clean_dataset.pkl
 │   ├── new_clean_dataset.pkl
 │   ├── test.csv
 │   └── train.csv
-├── eda
+├── eda/                       # Разведочный анализ данных
 │   ├── eda_revised.ipynb
 │   ├── eda.ipynb
-│   └── graph
-├── mlartifacts
-│   └── 1
-├── mlflow
-│   ├── main_features.txt
-│   ├── mlartifacts
-│   ├── mlflow.sh
-│   ├── mlruns.db
-│   └── new_feature_cols.txt
-├── mlruns.db
-├── README.md
-├── requirements.txt
-├── research
+│   └── graph/
+├── research/                  # Эксперименты с моделями
 │   └── research.ipynb
-└── venv
-    ├── bin
-    ├── include
-    ├── lib
-    ├── pyvenv.cfg
-    └── share
+├── services/                  # Микросервисы
+│   ├── ml_service/           # REST API для предсказаний
+│   │   ├── main.py
+│   │   ├── api_handler.py
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   ├── requests/             # Сервис генерации тестовых запросов
+│   │   ├── send_requests.py
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   ├── models/               # ML модели
+│   │   ├── model.pkl
+│   │   └── get_model.py
+│   ├── prometheus/           # Конфигурация мониторинга
+│   │   └── prometheus.yml
+│   ├── grafana/              # Дашборды и конфигурация
+│   │   ├── ml_service_dashboard.json
+│   │   ├── DASHBOARD_IMPORT.md
+│   │   └── README_DASHBOARD_SECTION.md
+│   └── compose.yml           # Docker Compose конфигурация
+├── mlflow/                    # MLflow конфигурация
+│   └── mlflow.sh
+├── mlartifacts/              # Артефакты MLflow
+├── mlruns.db                 # База данных экспериментов
+├── README.md
+└── requirements.txt          # Зависимости Python
 ```
 
 ## Запуск проекта
@@ -200,4 +223,210 @@ jupyter notebook eda/eda.ipynb
 
 Идентификатор Production-модели в MLflow: `adf10749f4b14844b47b31efe72d1370`
 
+# Создание сервиса
+
+### 1. Основной API-сервер с FastAPI
+
+**Реализованные эндпоинты:**
+- **GET /** - возвращает сообщение `{'Hello': 'world'}` для проверки работоспособности <br/>
+- **POST /api/prediction** - принимает характеристики мобильного телефона и возвращает предсказанный ценовой диапазон <br/>
+- **GET /metrics** - возвращает метрики Prometheus для мониторинга <br/>
+- **GET /docs** - интерактивная Swagger UI документация <br/>
+
+### 2. Обработчик предсказаний модели
+
+**Класс FastAPIHandler:**
+- При создании экземпляра класса загружает модель из файла `model.pkl` <br/>
+- Логирует успешность загрузки или ошибки <br/>
+- Метод `predict` принимает словарь с признаками телефона, преобразует его в pandas.DataFrame, подает на вход модели и возвращает предсказанный ценовой диапазон <br/>
+
+### 3. Dockerfile для контейнеризации сервиса
+
+```dockerfile
+FROM python:3.9-slim
+COPY . /ml_service
+RUN mkdir -p /models
+WORKDIR /ml_service
+RUN pip install --no-cache-dir -r requirements.txt
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+**Особенности:**
+- Копирование всех файлов приложения в контейнер <br/>
+- Установка зависимостей из `requirements.txt` <br/>
+- Обеспечение возможности подключения модели через монтируемую папку (`/models`) <br/>
+- Запуск приложения с помощью uvicorn <br/>
+
+### 4. Зависимости сервиса (requirements.txt)
+
+```txt
+fastapi
+uvicorn
+pandas
+scikit-learn==1.6.1
+pickle4
+cloudpickle
+prometheus-client==0.19.0
+```
+
+### 5. Интеграция с MLflow
+
+**Назначение:**
+- Загружаем модель из MLflow с помощью скрипта `services/models/get_model.py` <br/>
+- Сохраняет модель в файл `model.pkl` для дальнейшего использования в контейнере <br/>
+
+### 6. Проверка работоспособности сервиса
+
+**Пример тестового запроса:**
+```python
+{
+    "battery_power": 1403,
+    "blue": 0,
+    "clock_speed": 2.7,
+    "dual_sim": 0,
+    "fc": 2,
+    "four_g": 1,
+    "int_memory": 26,
+    "m_dep": 0.1,
+    "mobile_wt": 164,
+    "n_cores": 5,
+    "pc": 10,
+    "px_height": 1200,
+    "px_width": 1251,
+    "ram": 3371,
+    "sc_h": 13,
+    "sc_w": 9,
+    "talk_time": 9,
+    "three_g": 1,
+    "touch_screen": 0,
+    "wifi": 1,
+    "battery_efficiency": 8.554878,
+    "screen_size": 15.811388
+}
+```
+
+**Ожидаемый ответ:**
+```python
+{
+    "item_id": 123,
+    "price": 2.85
+}
+```
+
+Сервис возвращает значение `price`, что позволяет определить ценовой диапазон мобильного телефона (0-3).
+
+## Мониторинг
+
+### 1. Prometheus
+
+**Настройка:**
+- Веб-интерфейс доступен по адресу: http://localhost:9090 <br/>
+- Конфигурационный файл: `services/prometheus/prometheus.yml` <br/>
+- Полученные скриншоты и файл конфигурации размещены в директории: `services/prometheus/` <br/>
+
+**Ключевые метрики:**
+
+**Гистограмма предсказаний модели**
+![alt text](<graphf/prediction histogram.jpg>)
+
+**Частота (rate) запросов к основному сервису в минуту**
+![alt text](<graphf/frequency of requests.jpg>)
+
+### 2. Grafana Dashboard
+
+**Настройка:**
+- Создан дашборд для мониторинга метрик, который сохранён в директории: `services/grafana/` <br/>
+- Веб-интерфейс Grafana доступен по адресу: http://localhost:3000 <br/>
+- В качестве источника данных (data source) используется Prometheus <br/>
+- Готовый дашборд для импорта: `services/grafana/ml_service_dashboard.json` <br/>
+
+![alt text](graphf/grafana_dashboard_1.png)
+![alt text](graphf/grafana_dashboard_2.png)
+
+**Панели дашборда:**
+
+**Панель 1 - ML Model Predictions Distribution**
+- **Визуализация**: Гистограмма распределения предсказаний модели по ценовым диапазонам (0-3)
+- **Метрики**: `ml_model_predictions_bucket`
+- **Назначение**: Анализ распределения результатов работы модели, выявление bias в предсказаниях
+- **Уровень**: Прикладной
+
+**Панель 2 - Request Rate**
+- **Визуализация**: Частота HTTP-запросов в секунду к сервису предсказаний
+- **Метрики**: `rate(ml_service_requests_total[1m])`
+- **Назначение**: Мониторинг нагрузки на API и частоты использования сервиса
+- **Уровень**: Инфраструктурный
+
+**Панель 3 - HTTP Errors 4xx/5xx**
+- **Визуализация**: Частота ошибок HTTP с кодами 4xx и 5xx
+- **Метрики**: `ml_service_errors_total{status_code="500"}`, `ml_service_errors_total{status_code=~"4.."}`
+- **Назначение**: Контроль стабильности работы API и выявление проблем
+- **Уровень**: Инфраструктурный
+
+**Панель 4 - Request Latency**
+- **Визуализация**: Среднее время ответа сервиса на запросы
+- **Метрики**: `rate(http_request_duration_seconds_sum[1m]) / rate(http_request_duration_seconds_count[1m])`
+- **Назначение**: Мониторинг производительности, выявление деградации
+- **Уровень**: Инфраструктурный
+
+**Панель 5 - Total Requests**
+- **Визуализация**: Общее количество выполненных запросов с момента запуска
+- **Метрики**: `ml_service_requests_total`
+- **Назначение**: Отслеживание объёма работы сервиса
+- **Уровень**: Инфраструктурный
+
+**Панель 6 - Total Errors**
+- **Визуализация**: Суммарное количество всех ошибок
+- **Метрики**: `sum(ml_service_errors_total)`
+- **Назначение**: Быстрая оценка надежности сервиса
+- **Уровень**: Инфраструктурный
+
+**Панель 7 - Average Prediction**
+- **Визуализация**: Среднее значение предсказаний модели
+- **Метрики**: `ml_model_predictions_sum / ml_model_predictions_count`
+- **Назначение**: Отслеживание тренда предсказаний, детектирование data drift
+- **Уровень**: Прикладной
+
+**Панель 8 - Predictions by Price Range**
+- **Визуализация**: Pie chart с распределением предсказаний по ценовым категориям
+- **Метрики**: `sum by(le) (increase(ml_model_predictions_bucket[1h]))`
+- **Назначение**: Визуализация популярности каждого ценового диапазона
+- **Уровень**: Прикладной
+
+## Запуск системы
+
+### 1. Команды для запуска
+
+```bash
+# Сборка образа ML сервиса
+docker compose build ml_service
+
+# Запуск compose-проекта
+cd services
+docker compose up -d
+```
+
+### 2. Доступные сервисы после запуска
+
+| Сервис | URL | Описание |
+|--------|-----|----------|
+| ML Service | http://localhost:8000 | REST API для предсказания ценового диапазона |
+| Swagger UI | http://localhost:8000/docs | Интерактивная документация API |
+| Prometheus | http://localhost:9090 | Сбор и хранение метрик |
+| Grafana | http://localhost:3000 | Визуализация метрик и дашборды |
+
 ---
+
+### 3. Дашборды Grafana
+
+| Панель | Метрики | Уровень | Назначение |
+|--------|---------|---------|------------|
+| ML Model Predictions Distribution | `ml_model_predictions_bucket` | Прикладной | Распределение предсказаний |
+| Request Rate | `ml_service_requests_total` | Инфраструктурный | Нагрузка на API |
+| HTTP Errors 4xx/5xx | `ml_service_errors_total` | Инфраструктурный | Стабильность сервиса |
+| Request Latency | `http_request_duration_seconds` | Инфраструктурный | Производительность |
+| Total Requests | `ml_service_requests_total` | Инфраструктурный | Объём работы сервиса |
+| Total Errors | `ml_service_errors_total` | Инфраструктурный | Надежность сервиса |
+| Average Prediction | `ml_model_predictions_sum/count` | Прикладной | Тренд предсказаний |
+| Predictions by Price Range | `ml_model_predictions_bucket` | Прикладной | Распределение по категориям |
